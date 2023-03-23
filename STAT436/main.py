@@ -10,9 +10,11 @@ if __name__ == "__main__":
     # reward
     reward = np.array([1, 0 ,-1])
     # initial dynamics with randomAgent
-    init_dynamics = pi_dynamics(pi, gamma, reward)
-    state_value = init_dynamics.compute_state_value()
-    action_value = init_dynamics.compute_action_value()
+    
+    init_dynamics = dynamics
+    init_pi_dynamics = pi_dynamics(pi, gamma, reward, init_dynamics)
+    state_value = init_pi_dynamics.compute_state_value()
+    action_value = init_pi_dynamics.compute_action_value()
 
     # run random action
     run_grid_world(pi, state_value, action_value)
@@ -20,7 +22,7 @@ if __name__ == "__main__":
     # update policy via value function
     print("Updating Policy...")
     pi_new = update_policy(pi, action_value)
-    pi_new, state_value_new, action_value_new = policy_iteration(pi_new, pi, gamma, reward)
+    pi_new, state_value_new, action_value_new = policy_iteration(pi_new, pi, gamma, reward, init_dynamics)
     
     # run updated policy
     run_grid_world(pi_new, state_value_new, action_value_new)

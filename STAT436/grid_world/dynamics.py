@@ -3,14 +3,14 @@ import numpy as np
 def compute_position(s):
     return np.array([s // 4, s % 4])
 
-def reverse_position(array):
-    return array[0] * 4 + array[1]
-
 def compute_distance(i, j):
     if np.sum(np.abs(compute_position(i) - compute_position(j))) <= 1:
         return 1
     else:
         return 0
+
+def reverse_position(array):
+    return array[0] * 4 + array[1]
 
 def policy_to_action(policy):
     action_list = ["↑", "←", "→", "↓"]

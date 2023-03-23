@@ -1,32 +1,7 @@
 import numpy as np
-from ..grid_world.dynamics import *
-
-def find_neighborhood(state):
-    nhbd = [_state for _state in range(12) if compute_distance(state, _state) == 1]
-    return nhbd
-
-def one_hot(scalar, dim):
-    vec = np.zeros(dim)
-    vec[scalar] = 1
-    return vec
-
-# update policy w/ greedy policy
-def update_policy(policy, action_value):
-
-    greedy_policy = np.zeros_like(policy)
-
-    for state in range(12):
-        if state in [3, 5, 7]:
-            action = np.array([0.25, 0.25, 0.25, 0.25])
-        else:
-            action = np.argmax(action_value[state, :])
-            action = one_hot(action, 4)
-        greedy_policy[state] = action
-    
-    return greedy_policy
 
 class pi_dynamics:
-    def __init__(self, pi, gamma, reward):
+    def __init__(self, pi, gamma, reward, dynamics):
         self.pi = pi    
         self.gamma = gamma
         self.reward = reward
@@ -81,6 +56,26 @@ class pi_dynamics:
         action_value = expectation_reward + expectation_value
         return action_value
 
+def one_hot(scalar, dim):
+    vec = np.zeros(dim)
+    vec[scalar] = 1
+    return vec
+
+# update policy w/ greedy policy
+def update_policy(policy, action_value):
+
+    greedy_policy = np.zeros_like(policy)
+
+    for state in range(12):
+        if state in [3, 5, 7]:
+            action = np.array([0.25, 0.25, 0.25, 0.25])
+        else:
+            action = np.argmax(action_value[state, :])
+            action = one_hot(action, 4)
+        greedy_policy[state] = action
+    
+    return greedy_policy
+
 # update state value function with new policy
 def update_value_functions(pi_new, gamma, reward):
     
@@ -91,14 +86,14 @@ def update_value_functions(pi_new, gamma, reward):
     return state_value_new, action_value_new
 
 # policy iteration
-def policy_iteration(pi_new, pi_old, gamma, reward, eps=1e-8):
+def policy_iteration(pi_new, pi_old, gamma, reward, dynamics, eps=1e-8):
 
     advances = np.inf
     n_it = 0
 
     while np.sum(advances) > eps:
-        dynamics_old = pi_dynamics(pi=pi_old, gamma=gamma, reward=reward)
-        dynamics_new = pi_dynamics(pi=pi_new, gamma=gamma, reward=reward)
+        dynamics_old = pi_dynamics(pi=pi_old, gamma=gamma, reward=reward, dynamics=dynamics)
+        dynamics_new = pi_dynamics(pi=pi_new, gamma=gamma, reward=reward, dynamics=dynamics)
         state_value_old = dynamics_old.compute_state_value()
         state_value_new = dynamics_new.compute_state_value()
         action_value_new = dynamics_new.compute_action_value()
