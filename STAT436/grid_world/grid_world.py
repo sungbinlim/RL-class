@@ -1,5 +1,5 @@
 import numpy as np
-from grid_world.dynamics import *
+from dynamics import *
 
 BOARD_ROWS = 3
 BOARD_COLS = 4
