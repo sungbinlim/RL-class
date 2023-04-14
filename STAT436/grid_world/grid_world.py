@@ -1,5 +1,4 @@
 import numpy as np
-from grid_world.dynamics import *
 
 BOARD_ROWS = 3
 BOARD_COLS = 4
@@ -7,6 +6,9 @@ WIN_STATE = (0, 3)
 LOSE_STATE = (1, 3)
 START = (2, 0)
 DETERMINISTIC = False
+
+def reverse_position(array):
+    return array[0] * 4 + array[1]
 
 def run_grid_world(policy, state_value, action_value, rounds=100):
     print("Let's run grid world!")
