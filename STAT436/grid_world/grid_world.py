@@ -1,5 +1,5 @@
 import numpy as np
-from dynamics import *
+from grid_world.dynamics import *
 
 BOARD_ROWS = 3
 BOARD_COLS = 4
@@ -153,18 +153,23 @@ class randomAgent:
         print("Success rate:{} %".format(success_rate * 100))
 
 class Agent:
-    def __init__(self, policy):
+    def __init__(self, policy, epsilon=None):
         self.states = []  # record position and action taken at the position
         self.actions = ["up", "left", "right", "down"]
         self.env = environment()
         self.isEnd = self.env.isEnd
         self.result_stat = []
         self.policy = policy
+        self.history = []
+        self.epsilon=epsilon # epsilon-soft
 
     def Action(self, state):
-        # action = np.random.choice(self.actions)
         state = reverse_position(state)
         action = np.random.choice(self.actions, p=self.policy[state,:])
+        if self.epsilon is not None:
+            prob = np.random.uniform(0, 1)
+            if prob < self.epsilon: # epsilon-soft policy
+                action = np.random.choice(self.actions)
         return action
 
     def takeAction(self, action):
@@ -176,14 +181,14 @@ class Agent:
         self.env = environment()
         self.isEnd = self.env.isEnd
 
-    def play(self, rounds):
+    def play(self, rounds, stat=False):
         i=0
         self.result_stat = []
         while i < rounds:
             if self.env.isEnd:
                 reward = self.env.giveReward()
-                if reward >= 1:
-                    self.result_stat.append(reward)
+                self.history.append(self.states)
+                self.result_stat.append(reward)
                 self.reset()
                 i += 1
             else:
@@ -192,9 +197,13 @@ class Agent:
                 self.env = self.takeAction(action)
                 self.env.isEndFunc()
                 self.isEnd = self.env.isEnd
-        success_rate = np.sum(self.result_stat) / rounds
-        print("Success rate:{} %".format(success_rate * 100))
-    
+        
+        success_rate = self.result_stat.count(1) / rounds
+        if stat: # stat mode
+            return success_rate
+        else:
+            return self.history, self.result_stat, success_rate
+
     def show_policy(self):
         action = policy_to_action(self.policy)
         self.env.show_action_board(action)
